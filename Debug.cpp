@@ -27,22 +27,25 @@ void Debug::Disable() {
 }
 
 void Debug::DebugThis(std::function<void()> debug_this) {
+	if(in_progress) return;
 	auto wrap = [&]() {
-		mtx.lock();
+		std::unique_lock<std::mutex> l(mtx);
+		
 		thread_debug[std::this_thread::get_id()] = this;
 		
 		debug_this();
 		
 		in_progress = false;
 		control = false;
-		mtx.unlock();
-		cv.notify_one();
+		l.unlock();
+		cv.notify_all();
 		
 	};
-	mtx.lock();
+	std::unique_lock<std::mutex> l(mtx);
+	
+	in_progress = true;
 	std::thread t(wrap);
 	t.detach();
-	in_progress = true;
 	giveUpControl();
 }
 
@@ -50,8 +53,7 @@ void Debug::giveUpControl() {
 	bool my_control = control;
 	control = !control;
 	std::unique_lock<std::mutex> l(mtx, std::adopt_lock);
-	l.unlock();
-	cv.notify_one();
+	cv.notify_all();
 	cv.wait(l, [&]{return control == my_control;});
 }
 
@@ -78,7 +80,7 @@ void Debug::ExcludeStage(std::string name) {
 
 Stage::Stage(std::string name, std::string msg) {
 	auto dbg = thread_debug.find(std::this_thread::get_id());
-	if(dbg == thread_debug.end()) {
+	if(dbg == thread_debug.end() || !dbg->second->in_progress) {
 		excluded = true;
 		return;
 	}
