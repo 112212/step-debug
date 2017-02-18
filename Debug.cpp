@@ -78,7 +78,7 @@ void Debug::ExcludeStage(std::string name) {
 
 // =========== STAGE =============
 
-Stage::Stage(std::string name, std::string msg) {
+Stage::Stage(std::string name, std::string msg, bool no_breakpoints) {
 	auto dbg = thread_debug.find(std::this_thread::get_id());
 	if(dbg == thread_debug.end() || !dbg->second->in_progress) {
 		excluded = true;
@@ -90,6 +90,7 @@ Stage::Stage(std::string name, std::string msg) {
 	if(!excluded && d->stage_callback) {
 		d->stage_callback(name, msg, true);
 	}
+	this->no_breakpoints = no_breakpoints;
 }
 
 Stage::~Stage() {
@@ -104,7 +105,7 @@ void Stage::msg(std::stringstream& msg) {
 }
 
 void Stage::Break() {
-	if(excluded || d->skip_breakpoints) return;
+	if(excluded || no_breakpoints || d->skip_breakpoints) return;
 	d->giveUpControl();
 }
 

@@ -81,6 +81,7 @@ class Debug {
 class Stage {
 	private:
 		bool excluded;
+		bool no_breakpoints;
 		std::string name;
 		Debug* d;
 		
@@ -97,7 +98,7 @@ class Stage {
 			msgvariadic(o, b...);
 		}
 	public:
-		Stage(std::string name, std::string msg="");
+		Stage(std::string name, std::string msg="", bool no_breakpoints=false);
 		~Stage();
 		
 		template<class... A>
