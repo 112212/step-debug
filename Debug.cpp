@@ -1,6 +1,6 @@
 #include "Debug.hpp"
 
-#include <map>
+
 #include <thread>
 #include <chrono>
 
@@ -98,9 +98,9 @@ Stage::~Stage() {
 	}
 }
 
-void Stage::Msg(std::string msg) {
+void Stage::msg(std::stringstream& msg) {
 	if(excluded) return;
-	d->messages.push_back(msg);
+	d->messages.push_back(msg.str());
 }
 
 void Stage::Break() {
