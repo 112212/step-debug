@@ -72,8 +72,12 @@ bool Debug::Running() {
 	return in_progress;
 }
 
-void Debug::ExcludeStage(std::string name) {
-	excluded_stages.insert(name);
+void Debug::ExcludeStage(std::string name, std::vector<std::string> v) {
+	if(!v.empty()) {
+		excluded_stage_reports[name].insert(v.begin(), v.end());
+	} else {
+		excluded_stages.insert(name);
+	}
 }
 
 

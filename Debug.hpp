@@ -56,6 +56,7 @@ class Debug {
 		std::vector<Message> messages;
 		StageCallbackType stage_callback;
 		std::set<std::string> excluded_stages;
+		std::map<std::string, std::set<std::string>> excluded_stage_reports;
 		void giveUpControl();
 		std::map<std::string, ReportCallbackType> report_callbacks;
 	public:
@@ -67,7 +68,7 @@ class Debug {
 		void Disable();
 		void StageCallback(StageCallbackType callback);
 		bool Running();
-		void ExcludeStage(std::string name);
+		void ExcludeStage(std::string name, std::vector<std::string> v={});
 		
 		template<class T>
 		void ReportCallback(std::string name, T callback) {
@@ -115,6 +116,10 @@ class Stage {
 			std::tuple<A...> t(a...);
 			auto it = d->report_callbacks.find(name);
 			if(it == d->report_callbacks.end()) return;
+			auto it2 = d->excluded_stage_reports.find(this->name);
+			if(it2 != d->excluded_stage_reports.end() && it2->second.count(name) == 1) {
+				return;
+			}
 			it->second(&t);
 		}
 		void Break();
