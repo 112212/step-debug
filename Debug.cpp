@@ -28,7 +28,7 @@ void Debug::Disable() {
 
 void Debug::DebugThis(std::function<void()> debug_this) {
 	if(in_progress) return;
-	auto wrap = [&]() {
+	auto wrap = [&, debug_this]() {
 		std::unique_lock<std::mutex> l(mtx);
 		
 		thread_debug[std::this_thread::get_id()] = this;
@@ -37,6 +37,7 @@ void Debug::DebugThis(std::function<void()> debug_this) {
 		
 		in_progress = false;
 		control = false;
+		skip_breakpoints = false;
 		l.unlock();
 		cv.notify_all();
 		
@@ -57,8 +58,8 @@ void Debug::giveUpControl() {
 	cv.wait(l, [&]{return control == my_control;});
 }
 
-std::vector<std::string> Debug::GetMessages() {
-	std::vector<std::string> msgs;
+std::vector<Message> Debug::GetMessages() {
+	std::vector<Message> msgs;
 	msgs.swap(messages);
 	return msgs;
 }
@@ -80,7 +81,7 @@ void Debug::ExcludeStage(std::string name) {
 
 Stage::Stage(std::string name, std::string msg, bool no_breakpoints) {
 	auto dbg = thread_debug.find(std::this_thread::get_id());
-	if(dbg == thread_debug.end() || !dbg->second->in_progress) {
+	if(dbg == thread_debug.end() || !dbg->second->in_progress || !dbg->second->enabled) {
 		excluded = true;
 		return;
 	}
@@ -101,7 +102,9 @@ Stage::~Stage() {
 
 void Stage::msg(std::stringstream& msg) {
 	if(excluded) return;
-	d->messages.push_back(msg.str());
+	auto message = std::make_pair(name, msg.str());
+	Report("message", message);
+	d->messages.push_back(message);
 }
 
 void Stage::Break() {

@@ -39,11 +39,12 @@ void call(F f, Tuple && t) {
 	tuple_call(f, std::forward<Tuple>(t), std::make_index_sequence<std::tuple_size<ttype>::value>{});
 }
 // ----------------------------------------
-
+typedef std::pair<std::string, std::string> Message;
 class Stage;
 class Debug {
 	typedef std::function<void(std::string, std::string, bool)> StageCallbackType;
 	typedef std::function<void(const void*)> ReportCallbackType;
+	
 	friend Stage;
 	private:
 		bool enabled;
@@ -52,7 +53,7 @@ class Debug {
 		bool control;
 		std::condition_variable cv;
 		std::mutex mtx;
-		std::vector<std::string> messages;
+		std::vector<Message> messages;
 		StageCallbackType stage_callback;
 		std::set<std::string> excluded_stages;
 		void giveUpControl();
@@ -61,7 +62,7 @@ class Debug {
 		Debug();
 		void Continue(bool skip_breakpoints=false);
 		void DebugThis(std::function<void()> debug_this);
-		std::vector<std::string> GetMessages();
+		std::vector<Message> GetMessages();
 		void Enable();
 		void Disable();
 		void StageCallback(StageCallbackType callback);
