@@ -71,7 +71,7 @@ class Debug {
 		
 		template<class T>
 		void ReportCallback(std::string name, T callback) {
-			auto adapter = [&](const void* data) {
+			auto adapter = [callback](const void* data) {
 				typename function_type_information<T>::tuple t = *(typename function_type_information<T>::tuple *)data;
 				call(callback, t);
 			};
