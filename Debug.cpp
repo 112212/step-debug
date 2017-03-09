@@ -10,12 +10,12 @@ static std::map<std::thread::id, Debug*> thread_debug;
 Debug::Debug() {
 	in_progress = false;
 	enabled = true;
-	skip_breakpoints = false;
+	skip_n_breakpoints = 0;
 	control = false;
 }
 
-void Debug::Continue(bool skip_breakpoints) {
-	this->skip_breakpoints = skip_breakpoints;
+void Debug::Continue(int skip_n_breakpoints) {
+	this->skip_n_breakpoints = skip_n_breakpoints;
 	giveUpControl();
 }
 
@@ -37,7 +37,7 @@ void Debug::DebugThis(std::function<void()> debug_this) {
 		
 		in_progress = false;
 		control = false;
-		skip_breakpoints = false;
+		skip_n_breakpoints = 0;
 		l.unlock();
 		cv.notify_all();
 		
@@ -112,7 +112,11 @@ void Stage::msg(std::stringstream& msg) {
 }
 
 void Stage::Break() {
-	if(excluded || no_breakpoints || d->skip_breakpoints) return;
+	if(excluded || no_breakpoints) return;
+	if(d->skip_n_breakpoints>0) {
+		d->skip_n_breakpoints--;
+		return;
+	}
 	d->giveUpControl();
 }
 

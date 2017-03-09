@@ -48,7 +48,7 @@ class Debug {
 	friend Stage;
 	private:
 		bool enabled;
-		bool skip_breakpoints;
+		int skip_n_breakpoints;
 		bool in_progress;
 		bool control;
 		std::condition_variable cv;
@@ -61,7 +61,7 @@ class Debug {
 		std::map<std::string, ReportCallbackType> report_callbacks;
 	public:
 		Debug();
-		void Continue(bool skip_breakpoints=false);
+		void Continue(int skip_n_breakpoints=0);
 		void DebugThis(std::function<void()> debug_this);
 		std::vector<Message> GetMessages();
 		void Enable();
