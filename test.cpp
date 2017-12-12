@@ -40,9 +40,9 @@ int main() {
 	
 	
 	while(dbg.Running()) {
-		for(const std::string& s : dbg.GetMessages()) {
+		for(const sdb::Message& s : dbg.GetMessages()) {
 			
-			std::cout << s << "\n";
+			std::cout << s.first << ": " << s.second << "\n";
 		}
 		std::cout << "breakpoint! continue?\n";
 		std::string s;
