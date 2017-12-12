@@ -80,6 +80,16 @@ void Debug::ExcludeStage(std::string name, std::vector<std::string> v) {
 	}
 }
 
+void Debug::IncludeStage(std::string name, std::vector<std::string> v) {
+	if(!v.empty()) {
+		for(auto &s : v) {
+			excluded_stage_reports[name].erase(s);
+		}
+	} else {
+		excluded_stages.erase(name);
+	}
+}
+
 
 // =========== STAGE =============
 

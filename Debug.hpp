@@ -69,6 +69,7 @@ class Debug {
 		void StageCallback(StageCallbackType callback);
 		bool Running();
 		void ExcludeStage(std::string name, std::vector<std::string> v={});
+		void IncludeStage(std::string name, std::vector<std::string> v={});
 		
 		template<class T>
 		void ReportCallback(std::string name, T callback) {
